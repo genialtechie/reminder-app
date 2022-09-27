@@ -6,42 +6,9 @@ import NewList from './NewList';
 import ListPage from './ListPage';
 import NewReminder from './NewReminder';
 
-const lists = [
-  {
-    title: 'Learning',
-    reminders: [
-      {
-        title: 'JS tutorial',
-        notes: 'frontend masters tutorial',
-        completed: false,
-      },
-      {
-        title: 'Elements of style',
-        notes: 'book',
-        completed: false,
-      },
-    ],
-  },
-  {
-    title: 'Shopping',
-    reminders: [
-      {
-        title: 'M1 mac',
-        notes: 'laptop',
-        completed: false,
-      },
-      {
-        title: 'extension cables',
-        notes: '',
-        completed: false,
-      },
-    ],
-  },
-];
-
 const Dashboard = () => {
   const [newListBtn, setNewListBtn] = useState(false);
-  const [data, setData] = useState({ lists: lists });
+  const [data, setData] = useState({ lists: [] });
   const [openList, setOpenList] = useState({ open: false, title: '' });
   const [newReminder, setNewReminder] = useState({ open: false, title: '' });
 
@@ -71,17 +38,14 @@ const Dashboard = () => {
       notes: value.notes,
       completed: value.completed,
     };
-    setData(
-      data.lists.map((obj) => {
-        if (obj.title === list) {
-          obj.reminders.map((reminder) => {
-            if (reminder.title === value.title) return reminder;
-            else return { ...newReminder };
-          });
-        }
-        return obj;
-      })
-    );
+    const tempList = [...data.lists];
+    const id = tempList.findIndex((obj) => obj.title === list);
+    id === -1
+      ? console.log('list not found')
+      : tempList[id].reminders.push(newReminder);
+    setData((current) => {
+      return { lists: [...tempList] };
+    });
   }
 
   return (
@@ -111,8 +75,9 @@ const Dashboard = () => {
         </div>
         <div className="relative h-fit">
           <button
+            disabled={data.lists.length === 0}
             onClick={() => setNewReminder({ open: true })}
-            className="float-left rounded-lg text-center pr-3 bg-gray-50 transition duration-500 hover:bg-gray-200"
+            className="float-left rounded-lg text-center pr-3 bg-gray-50 transition duration-500 hover:bg-gray-200 disabled:bg-gray-50"
           >
             <New className="scale-50 inline-block" />
             <span>New Reminder</span>
@@ -133,6 +98,7 @@ const Dashboard = () => {
             show={newReminder}
             close={() => setNewReminder({ open: false, title: '' })}
             addReminder={handleNewReminder}
+            lists={data.lists}
           />
         </div>
         <ListPage
